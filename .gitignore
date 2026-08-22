@@ -1,0 +1,19 @@
+# Python
+ai-engine/venv/
+ai-engine/__pycache__/
+ai-engine/.venv/
+*.pyc
+
+# Java
+backend/Monitoring/target/
+backend/Monitoring/.classpath
+backend/Monitoring/.project
+backend/Monitoring/.settings/
+
+# React
+frontend/nomac-dashboard/node_modules/
+
+# General
+.venv/
+venv/
+*.log
