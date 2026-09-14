@@ -9,6 +9,7 @@ backend/Monitoring/target/
 backend/Monitoring/.classpath
 backend/Monitoring/.project
 backend/Monitoring/.settings/
+backend/Monitoring/bin/
 
 # React
 frontend/nomac-dashboard/node_modules/
@@ -17,3 +18,4 @@ frontend/nomac-dashboard/node_modules/
 .venv/
 venv/
 *.log
+.env
