@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,8 +14,13 @@ import com.nomac.Monitoring.repository.SensorReadingRepository;
 @Service
 public class AnomalyService {
 
-    @Autowired
-    private SensorReadingRepository repository;
+    private final SensorReadingRepository repository;
+    private final RestTemplate restTemplate;
+
+    public AnomalyService(SensorReadingRepository repository, RestTemplate restTemplate) {
+        this.repository = repository;
+        this.restTemplate = restTemplate;
+    }
 
     public SensorReading analyzeSensorData(SensorReading reading) {
         Map<String, Object> requestBody = new HashMap<>();
@@ -27,7 +31,6 @@ public class AnomalyService {
         requestBody.put("module_temperature", reading.getModuleTemperature());
         requestBody.put("efficiency", reading.getEfficiency());
 
-        RestTemplate restTemplate = new RestTemplate();
         Map response = restTemplate.postForObject(
             "http://ai-engine:8000/predict",
             requestBody,
