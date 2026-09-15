@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
@@ -5,8 +7,9 @@ import numpy as np
 
 app = FastAPI(title="Nomac Anomaly Detection API")
 
-model = joblib.load("../models/isolation_forest.pkl")
-scaler = joblib.load("../models/scaler.pkl")
+MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
+model = joblib.load(MODELS_DIR / "isolation_forest.pkl")
+scaler = joblib.load(MODELS_DIR / "scaler.pkl")
 
 class SensorData(BaseModel):
     dc_power: float
