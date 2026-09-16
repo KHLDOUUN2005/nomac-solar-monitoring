@@ -1,6 +1,7 @@
 package com.nomac.Monitoring.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
+import com.nomac.Monitoring.exception.AiEngineUnavailableException;
 import com.nomac.Monitoring.model.SensorReading;
 import com.nomac.Monitoring.repository.SensorReadingRepository;
 
@@ -128,5 +130,48 @@ class AnomalyServiceTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getIsAnomaly()).isTrue();
+    }
+
+    @Test
+    void analyzeSensorData_throwsAiEngineUnavailable_whenRestCallFails() {
+        when(restTemplate.postForObject(anyString(), any(), eq(Map.class)))
+                .thenThrow(new org.springframework.web.client.ResourceAccessException("connection refused"));
+
+        SensorReading reading = newReading();
+
+        assertThatThrownBy(() -> anomalyService.analyzeSensorData(reading))
+                .isInstanceOf(AiEngineUnavailableException.class);
+
+        verify(repository, org.mockito.Mockito.never()).save(any());
+    }
+
+    @Test
+    void analyzeSensorData_throwsAiEngineUnavailable_whenResponseIsNull() {
+        when(restTemplate.postForObject(anyString(), any(), eq(Map.class)))
+                .thenReturn(null);
+
+        SensorReading reading = newReading();
+
+        assertThatThrownBy(() -> anomalyService.analyzeSensorData(reading))
+                .isInstanceOf(AiEngineUnavailableException.class);
+
+        verify(repository, org.mockito.Mockito.never()).save(any());
+    }
+
+    @Test
+    void analyzeSensorData_throwsAiEngineUnavailable_whenResponseIsMissingFields() {
+        Map<String, Object> incompleteResponse = new HashMap<>();
+        incompleteResponse.put("status", "normal");
+        // "anomaly" and "score" deliberately missing
+
+        when(restTemplate.postForObject(anyString(), any(), eq(Map.class)))
+                .thenReturn(incompleteResponse);
+
+        SensorReading reading = newReading();
+
+        assertThatThrownBy(() -> anomalyService.analyzeSensorData(reading))
+                .isInstanceOf(AiEngineUnavailableException.class);
+
+        verify(repository, org.mockito.Mockito.never()).save(any());
     }
 }

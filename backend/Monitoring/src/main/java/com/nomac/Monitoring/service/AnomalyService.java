@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.nomac.Monitoring.exception.AiEngineUnavailableException;
 import com.nomac.Monitoring.model.SensorReading;
 import com.nomac.Monitoring.repository.SensorReadingRepository;
 
@@ -31,14 +33,34 @@ public class AnomalyService {
         requestBody.put("module_temperature", reading.getModuleTemperature());
         requestBody.put("efficiency", reading.getEfficiency());
 
-        Map response = restTemplate.postForObject(
-            "http://ai-engine:8000/predict",
-            requestBody,
-            Map.class
-        );
+        Map response;
+        try {
+            response = restTemplate.postForObject(
+                "http://ai-engine:8000/predict",
+                requestBody,
+                Map.class
+            );
+        } catch (RestClientException ex) {
+            throw new AiEngineUnavailableException(
+                "Unable to reach the AI engine to analyze this reading.", ex
+            );
+        }
 
-        reading.setIsAnomaly((Integer) response.get("anomaly") == 1);
-        reading.setAnomalyScore(((Number) response.get("score")).doubleValue());
+        if (response == null || response.get("anomaly") == null || response.get("score") == null) {
+            throw new AiEngineUnavailableException(
+                "AI engine returned an unexpected response."
+            );
+        }
+
+        try {
+            reading.setIsAnomaly((Integer) response.get("anomaly") == 1);
+            reading.setAnomalyScore(((Number) response.get("score")).doubleValue());
+        } catch (ClassCastException ex) {
+            throw new AiEngineUnavailableException(
+                "AI engine returned a response in an unexpected format.", ex
+            );
+        }
+
         reading.setTimestamp(LocalDateTime.now());
 
         return repository.save(reading);
