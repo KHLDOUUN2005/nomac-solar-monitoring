@@ -1,11 +1,16 @@
 package com.nomac.Monitoring.controller;
 
-import com.nomac.Monitoring.model.SensorReading;
-import com.nomac.Monitoring.service.AnomalyService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.nomac.Monitoring.dto.SensorReadingRequest;
+import com.nomac.Monitoring.dto.SensorReadingResponse;
+import com.nomac.Monitoring.model.SensorReading;
+import com.nomac.Monitoring.service.AnomalyService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -16,17 +21,30 @@ public class SensorController {
     private AnomalyService anomalyService;
 
     @PostMapping("/sensor")
-    public SensorReading analyze(@RequestBody SensorReading reading) {
-        return anomalyService.analyzeSensorData(reading);
+    public SensorReadingResponse analyze(@Valid @RequestBody SensorReadingRequest request) {
+        SensorReading reading = new SensorReading();
+        reading.setDcPower(request.dcPower());
+        reading.setAcPower(request.acPower());
+        reading.setIrradiation(request.irradiation());
+        reading.setAmbientTemperature(request.ambientTemperature());
+        reading.setModuleTemperature(request.moduleTemperature());
+        reading.setEfficiency(request.efficiency());
+
+        SensorReading analyzed = anomalyService.analyzeSensorData(reading);
+        return SensorReadingResponse.fromEntity(analyzed);
     }
 
     @GetMapping("/sensors")
-    public List<SensorReading> getAllReadings() {
-        return anomalyService.getAllReadings();
+    public List<SensorReadingResponse> getAllReadings() {
+        return anomalyService.getAllReadings().stream()
+                .map(SensorReadingResponse::fromEntity)
+                .toList();
     }
 
     @GetMapping("/sensors/anomalies")
-    public List<SensorReading> getAnomalies() {
-        return anomalyService.getAnomalies();
+    public List<SensorReadingResponse> getAnomalies() {
+        return anomalyService.getAnomalies().stream()
+                .map(SensorReadingResponse::fromEntity)
+                .toList();
     }
 }
