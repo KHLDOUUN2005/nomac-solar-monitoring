@@ -2,8 +2,12 @@ package com.nomac.Monitoring.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.nomac.Monitoring.dto.SensorReadingRequest;
 import com.nomac.Monitoring.dto.SensorReadingResponse;
@@ -17,8 +21,11 @@ import jakarta.validation.Valid;
 @CrossOrigin(origins = "*")
 public class SensorController {
 
-    @Autowired
-    private AnomalyService anomalyService;
+    private final AnomalyService anomalyService;
+
+    public SensorController(AnomalyService anomalyService) {
+        this.anomalyService = anomalyService;
+    }
 
     @PostMapping("/sensor")
     public SensorReadingResponse analyze(@Valid @RequestBody SensorReadingRequest request) {

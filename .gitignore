@@ -3,6 +3,8 @@ ai-engine/venv/
 ai-engine/__pycache__/
 ai-engine/.venv/
 *.pyc
+ai-engine/notebooks/.ipynb_checkpoints/
+.ipynb_checkpoints/
 
 # Java
 backend/Monitoring/target/

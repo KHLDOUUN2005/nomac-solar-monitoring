@@ -1,6 +1,7 @@
 package com.nomac.Monitoring.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -20,16 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.nomac.Monitoring.model.SensorReading;
 import com.nomac.Monitoring.service.AnomalyService;
 
-import tools.jackson.databind.ObjectMapper;
-
 @WebMvcTest(SensorController.class)
 class SensorControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockitoBean
     private AnomalyService anomalyService;
